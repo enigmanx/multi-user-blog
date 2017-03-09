@@ -33,10 +33,18 @@
   </header>
   <div class="container">
     <div id="content">
+    {% for flash in flash_messages %}
+    <div class="notification is-{{flash[1]}} flash-message">
+      <button class="delete"></button>
+      {{flash[0]}}
+    </div>
+    {% endfor %}
     {% block content %}
     {% endblock %}
     </div>
   </div>
+
+  <script type="text/javascript" src="/static/main.js"></script>
 </body>
 
 </html>

@@ -1,5 +1,6 @@
 import webapp2
 
+from webapp2_extras import sessions
 from google.appengine.ext import ndb
 from template import render_str
 from security import make_secure_val, check_secure_val
@@ -7,12 +8,30 @@ from user import User
 from post import Post
 
 
+BLOG_KEY = ndb.Key('Blog', 'default')
+
+
 class BlogHandler(webapp2.RequestHandler):
+    def dispatch(self):
+        self.session_store = sessions.get_store(request=self.request)
+        try:
+            webapp2.RequestHandler.dispatch(self)
+        finally:
+            self.session_store.save_sessions(self.response)
+
+    @webapp2.cached_property
+    def session(self):
+        return self.session_store.get_session()
+
+    def flash(self, message, level):
+        self.session.add_flash(message, level, key="_messages")
+
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
         params['user'] = self.user
+        params['flash_messages'] = self.session.get_flashes(key="_messages")
         return render_str(template, **params)
 
     def render(self, template, **kw):
@@ -43,9 +62,6 @@ class BlogHandler(webapp2.RequestHandler):
 class MainPage(BlogHandler):
     def get(self):
         self.redirect("/blog")
-
-
-BLOG_KEY = ndb.Key('Blog', 'default')
 
 
 class BlogFront(BlogHandler):
@@ -92,17 +108,15 @@ class NewPost(BlogHandler):
         if subject and content:
             if post_id:
                 p = Post.by_id(BLOG_KEY, post_id)
-                # TODO: refactor
-                if not p.is_owned_by(self.user):
-                    error = "hey, only the creator can edit this post!"
-                    self.render("newpost.html",
-                                subject=subject,
-                                content=content,
-                                error=error)
-                    return
-                else:
+                own = p and p.is_owned_by(self.user)
+                if own:
                     p.subject = subject
                     p.content = content
+                else:
+                    self.flash(
+                        "you can't edit other's posts",
+                        "danger")
+
             else:
                 p = Post(parent=BLOG_KEY,
                          owner=owner.key,
@@ -131,8 +145,13 @@ class DeletePost(BlogHandler):
     def post(self, post_id):
         if self.user:
             p = Post.by_id(BLOG_KEY, post_id)
-            if p and p.is_owned_by(self.user):
+            own = p and p.is_owned_by(self.user)
+            if own:
                 p.key.delete()
+            else:
+                self.flash(
+                    "you can't delete other's posts",
+                    "danger")
 
             self.redirect("/blog ")
         else:
@@ -184,6 +203,11 @@ class Logout(BlogHandler):
         self.logout()
         self.redirect('/blog')
 
+app_config = {}
+app_config['webapp2_extras.sessions'] = {
+    'secret_key': 'not soo secret',
+}
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/?', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
@@ -194,4 +218,5 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/login', Login),
                                ('/logout', Logout)
                                ],
+                              config=app_config,
                               debug=True)

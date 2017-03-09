@@ -14,6 +14,14 @@ body {
     background-color: white;
     padding: 1.25rem;
     margin-bottom: 30px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+#content {
+     margin-top: 130px;
 }
 
 .app-title {

@@ -3,19 +3,25 @@
     <div class="content">
       <p>
         <strong>{{p.subject}}</strong>
-        <br>
+        <br />
+        <small>{{p.owner.get().name}} on {{p.created.strftime("%b %d, %Y")}}</small>
+        <br />
          {{p._render_text | safe}}
       </p>
     </div>
     <nav class="level">
       <div class="level-left">
         <a href="/blog/{{p.key.id()}}/edit" class="level-item">
-          <span class="icon is-small"><i class="fa fa-pencil"></i></span>
+          <span class="icon is-small"><i class="fa fa-edit"></i></span>
         </a>
         <a class="level-item">
-          <span class="icon is-small"><i class="fa fa-heart"></i></span>
+          <span class="icon is-small"><i class="fa fa-heart-o"></i></span>
         </a>
-        <small>Created by {{p.owner.get().name}} on {{p.created.strftime("%b %d, %Y")}}</small>
+        <span class="level-item tag">5</span>
+        <a class="level-item">
+          <span class="icon is-small"><i class="fa fa-comment-o"></i></span>
+        </a>
+        <span class="level-item tag">2</span>
       </div>
     </nav>
   </div>
