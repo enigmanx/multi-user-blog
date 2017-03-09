@@ -11,16 +11,26 @@
     </div>
     <nav class="level">
       <div class="level-left">
-        <a href="/blog/{{p.key.id()}}/edit" class="level-item">
+        <a href="/blog/{{p.key.id()}}/edit" class="button is-primary is-inverted level-item">
           <span class="icon is-small"><i class="fa fa-edit"></i></span>
         </a>
-        <a class="level-item">
-          <span class="icon is-small"><i class="fa fa-heart-o"></i></span>
-        </a>
-        <span class="level-item tag">5</span>
-        <a class="level-item">
-          <span class="icon is-small"><i class="fa fa-comment-o"></i></span>
-        </a>
+        <form method="post" action="/blog/{{p.key.id()}}/like">
+          <button class="level-item button is-primary is-inverted">
+            <span class="icon is-small">
+              {%if p.likes_it(user) %}
+                <i class="fa fa-heart"></i>
+              {% else %}
+                <i class="fa fa-heart-o"></i>
+              {% endif %}
+            </span>
+          </button>
+        </form>
+        <span class="level-item tag">{{p.likes|length}}</span>
+        <span>
+          <a class="level-item button is-primary is-inverted">
+            <span class="icon is-small"><i class="fa fa-comment-o"></i></span>
+          </a>
+        </span>
         <span class="level-item tag">2</span>
       </div>
     </nav>

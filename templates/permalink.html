@@ -2,6 +2,6 @@
 
 {% block content %}
   <div class="box">
-    {{post.render() | safe}}
+    {{post.render(user) | safe}}
   </div>
 {% endblock %}

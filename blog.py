@@ -121,6 +121,7 @@ class NewPost(BlogHandler):
                 p = Post(parent=BLOG_KEY,
                          owner=owner.key,
                          subject=subject,
+                         likes=[],
                          content=content)
 
             p.put()
@@ -154,6 +155,27 @@ class DeletePost(BlogHandler):
                     "danger")
 
             self.redirect("/blog ")
+        else:
+            self.redirect("/login")
+
+
+class LikePost(BlogHandler):
+    def post(self, post_id):
+        if self.user:
+            p = Post.by_id(BLOG_KEY, post_id)
+            own = p and p.is_owned_by(self.user)
+            if own:
+                self.flash("you can't like your own posts", "danger")
+            else:
+                likes = p.likes
+                if p.likes_it(self.user):
+                    likes.remove(self.user.key)
+                else:
+                    likes.append(self.user.key)
+                p.likes = likes
+                p.put()
+
+            self.redirect('/blog')
         else:
             self.redirect("/login")
 
@@ -214,6 +236,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)/delete', DeletePost),
                                ('/blog/newpost', NewPost),
                                ('/blog/([0-9]+)/edit', NewPost),
+                               ('/blog/([0-9]+)/like', LikePost),
                                ('/signup', Register),
                                ('/login', Login),
                                ('/logout', Logout)
