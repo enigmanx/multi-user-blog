@@ -56,7 +56,7 @@ class BlogFront(BlogHandler):
 
 class PostPage(BlogHandler):
     def get(self, post_id):
-        post = Post.by_id(post_id)
+        post = Post.by_id(BLOG_KEY, post_id)
 
         if not post:
             self.error(404)
@@ -66,13 +66,22 @@ class PostPage(BlogHandler):
 
 
 class NewPost(BlogHandler):
-    def get(self):
+    def get(self, post_id=""):
         if self.user:
-            self.render("newpost.html")
+            params = {}
+            # TODO: refactor
+            if post_id:
+                p = Post.by_id(BLOG_KEY, post_id)
+                if p:
+                    params = dict(subject=p.subject,
+                                  content=p.content,
+                                  key=p.key)
+
+            self.render("newpost.html", **params)
         else:
             self.redirect("/login")
 
-    def post(self):
+    def post(self, post_id=""):
         if not self.user:
             self.redirect('/blog')
 
@@ -81,10 +90,25 @@ class NewPost(BlogHandler):
         content = self.request.get('content')
 
         if subject and content:
-            p = Post(parent=BLOG_KEY,
-                     owner=owner.key,
-                     subject=subject,
-                     content=content)
+            if post_id:
+                p = Post.by_id(BLOG_KEY, post_id)
+                # TODO: refactor
+                if not p.is_owned_by(self.user):
+                    error = "hey, only the creator can edit this post!"
+                    self.render("newpost.html",
+                                subject=subject,
+                                content=content,
+                                error=error)
+                    return
+                else:
+                    p.subject = subject
+                    p.content = content
+            else:
+                p = Post(parent=BLOG_KEY,
+                         owner=owner.key,
+                         subject=subject,
+                         content=content)
+
             p.put()
             self.redirect('/blog/')
         else:
@@ -95,10 +119,18 @@ class NewPost(BlogHandler):
                         error=error)
 
 
+class EditPost(BlogHandler):
+    def get(self):
+        if self.user:
+            self.render("newpost.html")
+        else:
+            self.redirect("/login")
+
+
 class DeletePost(BlogHandler):
     def post(self, post_id):
         if self.user:
-            p = Post.by_id(BLOG_KEY, int(post_id))
+            p = Post.by_id(BLOG_KEY, post_id)
             if p and p.is_owned_by(self.user):
                 p.key.delete()
 
@@ -157,6 +189,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/([0-9]+)/delete', DeletePost),
                                ('/blog/newpost', NewPost),
+                               ('/blog/([0-9]+)/edit', NewPost),
                                ('/signup', Register),
                                ('/login', Login),
                                ('/logout', Logout)
