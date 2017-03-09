@@ -1,22 +1,22 @@
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from template import render_str
+from user import User
 
 
-# TODO: move. it's duplicated on the blog.py
-def blog_key(name='default'):
-    return db.Key.from_path('blogs', name)
-
-
-class Post(db.Model):
-    subject = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now=True)
+class Post(ndb.Model):
+    owner = ndb.KeyProperty(User)
+    subject = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    last_modified = ndb.DateTimeProperty(auto_now=True)
 
     @classmethod
-    def by_id(cls, post_id):
-        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-        return db.get(key)
+    def by_id(cls, parent, post_id):
+        key = ndb.Key(Post, int(post_id), parent=parent)
+        return key.get()
+
+    def is_owned_by(self, user):
+        return self.owner.id() == user.key.id()
 
     # TODO: move to a function
     def render(self):

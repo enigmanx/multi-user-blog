@@ -1,14 +1,25 @@
 {% extends "base.html" %}
 
+{% block header %}
+   {% if user %}
+    <span class="nav-item">
+      <a class="button is-primary" href="/blog/newpost">
+        NEW POST
+      </a>
+    </span>
+   {% endif %}
+
+{% endblock %}
+
 {% block content %}
-
-  {% if user %}
-    <a href="/blog/newpost">New Post</a>
+  {% if posts.count() %}
+    <div class="box">
+      {% for p in posts %}
+        {{ p.render() | safe }}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="title is-3"> Ohh no, no post found :/ </p>
   {% endif %}
-
-  {% for p in posts %}
-    {{ p.render() | safe }}
-    <br><br>
-  {% endfor %}
 
 {% endblock %}

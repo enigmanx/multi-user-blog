@@ -1,80 +1,48 @@
+html {
+    background: #f7f7f7;
+    overflow: auto;
+}
+
 body {
-    position: relative;
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     font-size: 14px;
-
-    width: 800px;
-    margin: 0 auto;
-    padding: 10px;
-    color: #333;
+    font-weight: 400;
 }
 
-.login-area {
-    font-size: 13px;
-    color: gray;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.login-link {
-    color: gray;
-    text-decoration: none;
-}
-
-.login-link:visited {
-    color: gray;
-}
-
-.login-link:hover {
-    text-decoration: underline;
-}
-
-h2 {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.error {
-    color: red;
-}
-
-label {
-  display: block;
-  font-size: 20px;
-}
-
-label + label {
-    margin-top: 20px;
-}
-
-input[type=text] {
-    width: 500px;
-    font-size: 20px;
-    padding: 2px;
-    font-family: monospace;
-}
-
-textarea {
-  width: 500px;
-  height: 400px;
-  font-size: 17px;
-  font-family: monospace;
-}
-
-input[type=submit] {
-  font-size: 24px;
-}
-
-.main-title {
-    display: block;
-    color: #222;
-    font-size: 40px;
-    font-weight: bold;
-    text-align: center;
+.header {
+    border-bottom: 1px solid #e0dddd;
+    background-color: white;
+    padding: 1.25rem;
     margin-bottom: 30px;
-    text-decoration: none;
+}
+
+.app-title {
+    font-size: 25px;
+}
+
+.app-title__prefix {
+    text-transform: lowercase;
+    margin-right: 5px;
+}
+
+.app-title__sufix {
+    color: black !important;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.login-box {
+    max-width: 500px;
+}
+
+.newpost-box textarea {
+    height: 300px;
 }
 
 .post + .post {

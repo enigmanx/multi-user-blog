@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>new post</h2>
 
+ <div class="container box newpost-box is-clearfix">
+    <h2 class="has-text-centered title">New post</h2>
     <form method="post">
-      <label>
-        <div>subject</div>
-        <input type="text" name="subject" value="{{subject}}">
-      </label>
-
-      <label>
-        <div>blog</div>
-        <textarea name="content">{{content}}</textarea>
-      </label>
-
-      <div class="error">{{error}}</div>
-
-      <input type="submit">
+      <p class="control">
+        <input class="input" type="text" placeholder="Subject" name="subject" value="{{subject}}">
+      </p>
+      <p class="control">
+        <textarea class="textarea" placeholder="What do you want to say?" name="content">{{content}}</textarea>
+      </p>
+      <p class="help is-danger">{{error}}</p>
+      <p class="control">
+        <button type="submit" class="button is-primary is-pulled-right">POST IT</button>
+      </p>
     </form>
+  </div>
+
 {% endblock %}

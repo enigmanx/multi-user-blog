@@ -1,15 +1,27 @@
-<div class="post">
-  <div class="post-heading">
-    <div class="post-title">
-      {{p.subject}}
+<article class="media">
+  <div class="media-content">
+    <div class="content">
+      <p>
+        <strong>{{p.subject}}</strong>
+        <br>
+         {{p._render_text | safe}}
+      </p>
     </div>
-
-    <div class="post-date">
-      {{p.created.strftime("%b %d, %Y")}}
-    </div>
+    <nav class="level">
+      <div class="level-left">
+        <a class="level-item">
+          <span class="icon is-small"><i class="fa fa-pencil"></i></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small"><i class="fa fa-heart"></i></span>
+        </a>
+        <small>Created by {{p.owner.get().name}} on {{p.created.strftime("%b %d, %Y")}}</small>
+      </div>
+    </nav>
   </div>
-
-  <div class="post-content">
-    {{p._render_text | safe}}
+  <div class="media-right">
+    <form method="post" action="/blog/{{p.key.id()}}/delete">
+      <button type="submit" class="delete"></button>
+    </form>
   </div>
-</div>
+</article>

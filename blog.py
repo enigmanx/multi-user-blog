@@ -1,6 +1,6 @@
 import webapp2
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from template import render_str
 from security import make_secure_val, check_secure_val
 from user import User
@@ -29,7 +29,7 @@ class BlogHandler(webapp2.RequestHandler):
         return cookie_val and check_secure_val(cookie_val)
 
     def login(self, user):
-        self.set_secure_cookie('user_id', str(user.key().id()))
+        self.set_secure_cookie('user_id', str(user.key.id()))
 
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
@@ -45,16 +45,12 @@ class MainPage(BlogHandler):
         self.redirect("/blog")
 
 
-# blog stuff
-
-# TODO: move... is duplicated in post.py
-def blog_key(name='default'):
-    return db.Key.from_path('blogs', name)
+BLOG_KEY = ndb.Key('Blog', 'default')
 
 
 class BlogFront(BlogHandler):
     def get(self):
-        posts = greetings = Post.all().order('-created')
+        posts = Post.query(ancestor=BLOG_KEY).order(-Post.created)
         self.render('front.html', posts=posts)
 
 
@@ -80,19 +76,35 @@ class NewPost(BlogHandler):
         if not self.user:
             self.redirect('/blog')
 
+        owner = self.user
         subject = self.request.get('subject')
         content = self.request.get('content')
 
         if subject and content:
-            p = Post(parent=blog_key(), subject=subject, content=content)
+            p = Post(parent=BLOG_KEY,
+                     owner=owner.key,
+                     subject=subject,
+                     content=content)
             p.put()
-            self.redirect('/blog/%s' % str(p.key().id()))
+            self.redirect('/blog/')
         else:
             error = "subject and content, please!"
             self.render("newpost.html",
                         subject=subject,
                         content=content,
                         error=error)
+
+
+class DeletePost(BlogHandler):
+    def post(self, post_id):
+        if self.user:
+            p = Post.by_id(BLOG_KEY, int(post_id))
+            if p and p.is_owned_by(self.user):
+                p.key.delete()
+
+            self.redirect("/blog ")
+        else:
+            self.redirect("/login")
 
 
 class Register(BlogHandler):
@@ -143,6 +155,7 @@ class Logout(BlogHandler):
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/?', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
+                               ('/blog/([0-9]+)/delete', DeletePost),
                                ('/blog/newpost', NewPost),
                                ('/signup', Register),
                                ('/login', Login),

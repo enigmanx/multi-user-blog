@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <a href="/blog">All Posts</a>
-  {{post.render() | safe}}
+  <div class="box">
+    {{post.render() | safe}}
+  </div>
 {% endblock %}

@@ -1,29 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400" />
+  <link type="text/css" rel="stylesheet" href=" https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.min.css" />
   <link type="text/css" rel="stylesheet" href="/static/main.css" />
-
   <title>Multi User Blog</title>
 </head>
 
 <body>
-  <a href="/blog" class="main-title">
-    Multi User Blog
-  </a>
-
-  <div class="login-area">
-    {% if user %}
-      {{user.name}} (<a class="login-link" href="/logout">logout</a>)
-    {% else %}
-      <a class="login-link" href="/login">login</a>
-      |
-      <a class="login-link" href="/signup">signup</a>
-    {% endif %}
-  </div>
-
-  <div id="content">
-  {% block content %}
-  {% endblock %}
+  <header class="header">
+    <nav class="nav container">
+      <div class="nav-left">
+        <a class="nav-item app-title" href="/">
+          <span class="app-title__prefix">Multi User</span>
+          <span class="app-title__sufix">Blog</span>
+        </a>
+        <a class="nav-item is-tab" href="/">All Posts</a>
+      </div>
+      <div class="nav-right nav-menu">
+        {% block header %}
+        {% endblock %}
+        {% if user %}
+          <span class="nav-item"> {{user.name}} </span>
+          <a class="nav-item" href="/logout">logout</a>
+        {% else %}
+          <a class="nav-item" href="/login">login</a>
+          <a class="nav-item" href="/signup">signup</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+  <div class="container">
+    <div id="content">
+    {% block content %}
+    {% endblock %}
+    </div>
   </div>
 </body>
 
