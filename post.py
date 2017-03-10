@@ -1,6 +1,7 @@
 from google.appengine.ext import ndb
 from template import render_str
 from user import User
+from comment import Comment
 
 
 class Post(ndb.Model):
@@ -22,8 +23,14 @@ class Post(ndb.Model):
     def likes_it(self, user):
         return user.key in self.likes
 
+    def comments(self):
+        return Comment.query(ancestor=self.key).order(-Comment.created).fetch()
+
+    @property
+    def text(self):
+        return self.content.replace('\n', '<br>')
+
     # TODO: move to a function
     def render(self, current_user=None):
-        self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p=self, user=current_user)
 

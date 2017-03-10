@@ -6,6 +6,7 @@ from template import render_str
 from security import make_secure_val, check_secure_val
 from user import User
 from post import Post
+from comment import Comment
 
 
 BLOG_KEY = ndb.Key('Blog', 'default')
@@ -180,6 +181,45 @@ class LikePost(BlogHandler):
             self.redirect("/login")
 
 
+class CommentsPage(BlogHandler):
+    def get(self, post_id):
+        p = Post.by_id(BLOG_KEY, post_id)
+        self.render('post-comments.html', p=p)
+
+
+class NewComment(BlogHandler):
+    def post(self, post_id):
+        if self.user:
+            message = self.request.get('message')
+            p = Post.by_id(BLOG_KEY, post_id)
+            print p.comments()
+            comment = Comment(parent=p.key,
+                              owner=self.user.key,
+                              message=message)
+            comment.put()
+            self.redirect('/blog/%s/comments' % post_id)
+        else:
+            self.redirect("/login")
+
+
+class DeleteComment(BlogHandler):
+    def post(self, post_id, comment_id):
+        if self.user:
+            postKey = ndb.Key(Post, int(post_id), parent=BLOG_KEY)
+            c = Comment.by_id(postKey, comment_id)
+            own = c and c.is_owned_by(self.user)
+            if own:
+                c.key.delete()
+            else:
+                self.flash(
+                    "you can't delete other's comments",
+                    "danger")
+
+            self.redirect('/blog/%s/comments' % post_id)
+        else:
+            self.redirect("/login")
+
+
 class Register(BlogHandler):
     def get(self):
         self.render("signup-form.html", errors={})
@@ -230,16 +270,20 @@ app_config['webapp2_extras.sessions'] = {
     'secret_key': 'not soo secret',
 }
 
-app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/blog/?', BlogFront),
-                               ('/blog/([0-9]+)', PostPage),
-                               ('/blog/([0-9]+)/delete', DeletePost),
-                               ('/blog/newpost', NewPost),
-                               ('/blog/([0-9]+)/edit', NewPost),
-                               ('/blog/([0-9]+)/like', LikePost),
-                               ('/signup', Register),
-                               ('/login', Login),
-                               ('/logout', Logout)
-                               ],
-                              config=app_config,
-                              debug=True)
+app = webapp2.WSGIApplication([
+    ('/', MainPage),
+    ('/blog/?', BlogFront),
+    ('/blog/([0-9]+)', PostPage),
+    ('/blog/([0-9]+)/delete', DeletePost),
+    ('/blog/newpost', NewPost),
+    ('/blog/([0-9]+)/edit', NewPost),
+    ('/blog/([0-9]+)/like', LikePost),
+    ('/blog/([0-9]+)/comments', CommentsPage),
+    ('/blog/([0-9]+)/comments/new', NewComment),
+    ('/blog/([0-9]+)/comments/([0-9]+)/delete', DeleteComment),
+    ('/signup', Register),
+    ('/login', Login),
+    ('/logout', Logout)
+    ],
+    config=app_config,
+    debug=True)

@@ -21,7 +21,7 @@ body {
 }
 
 #content {
-     margin-top: 130px;
+     margin: 130px 0 50px 0;
 }
 
 .app-title {

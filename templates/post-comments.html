@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <article class="media box">
+    <div class="media-content">
+      <div class="content">
+        <p>
+          <strong>{{p.subject}}</strong>
+          <br />
+          <small>{{p.owner.get().name}} on {{p.created.strftime("%b %d, %Y")}}</small>
+          <br />
+          {{p.text | safe}}
+        </p>
+      </div>
+      <nav class="level">
+        <div class="level-left">
+          <span class="level-item">
+            <span class="icon is-small">
+              {%if user and p.likes_it(user) %}
+                <i class="fa fa-heart"></i>
+              {% else %}
+                <i class="fa fa-heart-o"></i>
+              {% endif %}
+            </span>
+          </span>
+          <span class="level-item tag">{{p.likes | length}}</span>
+          <span class="level-item">
+            <span class="icon is-small"><i class="fa fa-comment-o"></i></span>
+          </span>
+          <span class="level-item tag">{{p.comments() | length}}</span>
+        </div>
+      </nav>
+      <div class="is-clearfix">
+        <form method="post" action="/blog/{{p.key.id()}}/comments/new">
+          <p class="control">
+            <textarea name="message" class="textarea" placeholder="What do you want to say?"></textarea>
+          </p>
+          <p class="control">
+            <button type="submit" class="button is-primary is-pulled-right">Comment</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </article>
+
+  {% if p.comments() | length %}
+    <h2 class="title is-4 has-text-centered">Comments</h2>
+    <div class="box">
+      {% for comment in p.comments() %}
+        <article class="media">
+          <div class="media-content">
+            <div class="content">
+              <p>
+                <strong>{{comment.owner.get().name}}</strong> {{comment.message | safe}}
+                <br />
+                <small>{{comment.created.strftime("%b %d, %Y")}}</small>
+              </p>
+            </div>
+          </div>
+          <div class="media-right">
+            <form method="post" action="/blog/{{p.key.id()}}/comments/{{comment.key.id()}}/delete">
+              <button type="submit" class="delete"></button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <h2 class="title is-4 has-text-centered">no comments in this post</h2>
+  {% endif %}
+{% endblock %}

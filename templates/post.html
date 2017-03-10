@@ -6,7 +6,7 @@
         <br />
         <small>{{p.owner.get().name}} on {{p.created.strftime("%b %d, %Y")}}</small>
         <br />
-         {{p._render_text | safe}}
+         {{p.text | safe}}
       </p>
     </div>
     <nav class="level">
@@ -17,7 +17,7 @@
         <form method="post" action="/blog/{{p.key.id()}}/like">
           <button class="level-item button is-primary is-inverted">
             <span class="icon is-small">
-              {%if p.likes_it(user) %}
+              {%if user and p.likes_it(user) %}
                 <i class="fa fa-heart"></i>
               {% else %}
                 <i class="fa fa-heart-o"></i>
@@ -25,13 +25,13 @@
             </span>
           </button>
         </form>
-        <span class="level-item tag">{{p.likes|length}}</span>
+        <span class="level-item tag">{{p.likes | length}}</span>
         <span>
-          <a class="level-item button is-primary is-inverted">
+          <a href="/blog/{{p.key.id()}}/comments" class="level-item button is-primary is-inverted">
             <span class="icon is-small"><i class="fa fa-comment-o"></i></span>
           </a>
         </span>
-        <span class="level-item tag">2</span>
+        <span class="level-item tag">{{p.comments() | length}}</span>
       </div>
     </nav>
   </div>
