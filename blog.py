@@ -135,14 +135,6 @@ class NewPost(BlogHandler):
                         error=error)
 
 
-class EditPost(BlogHandler):
-    def get(self):
-        if self.user:
-            self.render("newpost.html")
-        else:
-            self.redirect("/login")
-
-
 class DeletePost(BlogHandler):
     def post(self, post_id):
         if self.user:
@@ -192,11 +184,28 @@ class NewComment(BlogHandler):
         if self.user:
             message = self.request.get('message')
             p = Post.by_id(BLOG_KEY, post_id)
-            print p.comments()
             comment = Comment(parent=p.key,
                               owner=self.user.key,
                               message=message)
             comment.put()
+            self.redirect('/blog/%s/comments' % post_id)
+        else:
+            self.redirect("/login")
+
+
+# TODO: message can't be empty
+class EditComment(BlogHandler):
+    def post(self, post_id, comment_id):
+        postKey = ndb.Key(Post, int(post_id), parent=BLOG_KEY)
+        comment = Comment.by_id(postKey, comment_id)
+        if self.user:
+            if comment and comment.is_owned_by(self.user):
+                message = self.request.get('message')
+                comment.message = message
+                comment.put()
+            else:
+                self.flash("you can't edit other's comments", "danger")
+
             self.redirect('/blog/%s/comments' % post_id)
         else:
             self.redirect("/login")
@@ -280,6 +289,7 @@ app = webapp2.WSGIApplication([
     ('/blog/([0-9]+)/like', LikePost),
     ('/blog/([0-9]+)/comments', CommentsPage),
     ('/blog/([0-9]+)/comments/new', NewComment),
+    ('/blog/([0-9]+)/comments/([0-9]+)/edit', EditComment),
     ('/blog/([0-9]+)/comments/([0-9]+)/delete', DeleteComment),
     ('/signup', Register),
     ('/login', Login),

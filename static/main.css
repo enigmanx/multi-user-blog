@@ -79,3 +79,15 @@ body {
     margin-top: 5px;
 }
 
+.inline-editable .inline-editable__editor {
+    display: none;
+}
+
+.inline-editable.is-editing .inline-editable__editor {
+    display: block;
+}
+
+.inline-editable.is-editing .inline-editable__content {
+    display: none;
+}
+
