@@ -1,12 +1,11 @@
 <article class="media">
   <div class="media-content">
     <div class="content">
+      <a class="post__link title" href="/blog/{{p.key.id()}}">{{p.subject}}</a>
       <p>
-        <strong>{{p.subject}}</strong>
-        <br />
         <small>{{p.owner.get().name}} on {{p.created.strftime("%b %d, %Y")}}</small>
         <br />
-         {{p.text | safe}}
+        {{p.render_text(maxlines) | safe}}
       </p>
     </div>
     <nav class="level">
@@ -27,7 +26,7 @@
         </form>
         <span class="level-item tag">{{p.likes | length}}</span>
         <span>
-          <a href="/blog/{{p.key.id()}}/comments" class="level-item button is-primary is-inverted">
+          <a href="/blog/{{p.key.id()}}#comments-section" class="level-item button is-primary is-inverted">
             <span class="icon is-small"><i class="fa fa-comment-o"></i></span>
           </a>
         </span>

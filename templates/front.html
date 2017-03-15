@@ -16,7 +16,9 @@
   {% if posts.count() %}
     <div class="box">
       {% for p in posts %}
-        {{ p.render(user) | safe }}
+        {% with p=p, maxlines=5, user=user %}
+          {% include "post.html" %}
+        {% endwith %}
       {% endfor %}
     </div>
   {% else %}

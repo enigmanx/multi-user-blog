@@ -54,6 +54,9 @@ class BlogHandler(webapp2.RequestHandler):
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
+    def redirect_to_referer(self):
+        self.redirect(self.request.referer or '/blog')
+
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
@@ -79,7 +82,7 @@ class PostPage(BlogHandler):
             self.error(404)
             return
 
-        self.render("permalink.html", post=post)
+        self.render("post-permalink.html", p=post)
 
 
 class NewPost(BlogHandler):
@@ -92,7 +95,7 @@ class NewPost(BlogHandler):
                 if p:
                     params = dict(subject=p.subject,
                                   content=p.content,
-                                  key=p.key)
+                                  post_id=post_id)
 
             self.render("newpost.html", **params)
         else:
@@ -105,6 +108,7 @@ class NewPost(BlogHandler):
         owner = self.user
         subject = self.request.get('subject')
         content = self.request.get('content')
+        redirect_to = self.request.get('redirect_to')
 
         if subject and content:
             if post_id:
@@ -124,14 +128,15 @@ class NewPost(BlogHandler):
                          subject=subject,
                          likes=[],
                          content=content)
-
             p.put()
-            self.redirect('/blog/')
+            self.redirect('/blog/%s' % p.key.id())
+
         else:
             error = "subject and content, please!"
             self.render("newpost.html",
                         subject=subject,
                         content=content,
+                        post_id=post_id,
                         error=error)
 
 
@@ -168,15 +173,9 @@ class LikePost(BlogHandler):
                 p.likes = likes
                 p.put()
 
-            self.redirect('/blog')
+            self.redirect_to_referer()
         else:
             self.redirect("/login")
-
-
-class CommentsPage(BlogHandler):
-    def get(self, post_id):
-        p = Post.by_id(BLOG_KEY, post_id)
-        self.render('post-comments.html', p=p)
 
 
 class NewComment(BlogHandler):
@@ -188,7 +187,7 @@ class NewComment(BlogHandler):
                               owner=self.user.key,
                               message=message)
             comment.put()
-            self.redirect('/blog/%s/comments' % post_id)
+            self.redirect('/blog/%s#comments-section' % post_id)
         else:
             self.redirect("/login")
 
@@ -206,7 +205,7 @@ class EditComment(BlogHandler):
             else:
                 self.flash("you can't edit other's comments", "danger")
 
-            self.redirect('/blog/%s/comments' % post_id)
+            self.redirect('/blog/%s#comments-section' % post_id)
         else:
             self.redirect("/login")
 
@@ -224,7 +223,7 @@ class DeleteComment(BlogHandler):
                     "you can't delete other's comments",
                     "danger")
 
-            self.redirect('/blog/%s/comments' % post_id)
+            self.redirect('/blog/%s#comments-section' % post_id)
         else:
             self.redirect("/login")
 
@@ -287,7 +286,6 @@ app = webapp2.WSGIApplication([
     ('/blog/newpost', NewPost),
     ('/blog/([0-9]+)/edit', NewPost),
     ('/blog/([0-9]+)/like', LikePost),
-    ('/blog/([0-9]+)/comments', CommentsPage),
     ('/blog/([0-9]+)/comments/new', NewComment),
     ('/blog/([0-9]+)/comments/([0-9]+)/edit', EditComment),
     ('/blog/([0-9]+)/comments/([0-9]+)/delete', DeleteComment),

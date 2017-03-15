@@ -26,11 +26,11 @@ class Post(ndb.Model):
     def comments(self):
         return Comment.query(ancestor=self.key).order(-Comment.created).fetch()
 
-    @property
-    def text(self):
-        return self.content.replace('\n', '<br>')
-
-    # TODO: move to a function
-    def render(self, current_user=None):
-        return render_str("post.html", p=self, user=current_user)
+    def render_text(self, max_lines=None):
+        content_list = self.content.split('\n')
+        more = ''
+        if max_lines and len(content_list) > max_lines:
+            more = '... <a href="/blog/%s">(more)</a>' % self.key.id()
+            content_list = content_list[:max_lines]
+        return '<br>'.join(content_list) + more
 

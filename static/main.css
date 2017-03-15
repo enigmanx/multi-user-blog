@@ -24,6 +24,16 @@ body {
      margin: 130px 0 50px 0;
 }
 
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.help {
+    font-size: 14px;
+}
+
 .app-title {
     font-size: 25px;
 }
@@ -39,12 +49,6 @@ body {
     text-transform: uppercase;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    position: relative;
-}
-
 .login-box {
     max-width: 500px;
 }
@@ -53,30 +57,23 @@ body {
     height: 300px;
 }
 
-.post + .post {
-    margin-top: 15px;
-}
-
-.post-heading {
-    position: relative;
-    border-bottom: 3px solid #666;
-}
-
-.post-title {
-    font-size: 24px;
+.post__link, .post__link:hover {
+    color: black;
+    font-size: 16px;
     font-weight: bold;
+    letter-spacing: 1px;
 }
 
-.post-date {
-    position: absolute;
-    right: 0px;
-    bottom: 0px;
-    color: #999;
-
+.post__link:hover {
+    text-decoration: underline;
 }
 
-.post-content {
-    margin-top: 5px;
+.post__seemore, .post__seemore:hover {
+    color:hsl(0, 0%, 48%);
+}
+
+.post__seemore:hover {
+    text-decoration: underline;
 }
 
 .inline-editable .inline-editable__editor {
