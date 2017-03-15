@@ -19,6 +19,9 @@
       </p>
       <p class="help is-danger">{{error}}</p>
       <p class="control">
+        {% if post_id %}
+          <a href="/blog/{{post_id}}"class="button is-link is-pulled-right">Cancel</a>
+        {% endif %}
         <button type="submit" class="button is-primary is-pulled-right">POST IT</button>
       </p>
     </form>
