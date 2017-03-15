@@ -37,7 +37,7 @@
           <div class="media-content inline-editable__content">
             <div class="content">
               <p>
-                <strong>{{comment.owner.get().name}}</strong> {{comment.message | safe}}
+                <strong>{{comment.owner.get().name}}</strong> {{comment.render_text() | safe}}
               </p>
             </div>
             <nav class="level">
@@ -50,17 +50,17 @@
             </nav>
           </div>
           <div class="media-right inline-editable__content">
-            <form method="post" action="/blog/{{p.key.id()}}/comments/{{comment.key.id()}}/delete#comments-section">
+            <form method="post" action="/blog/{{p.key.id()}}/comments/{{comment.key.id()}}/delete">
               <button type="submit" class="delete"></button>
             </form>
           </div>
           <form
             class="media-content inline-editable__editor"
             method="post"
-            action="/blog/{{p.key.id()}}/comments/{{comment.key.id()}}/edit#comments-section"
+            action="/blog/{{p.key.id()}}/comments/{{comment.key.id()}}/edit"
           >
             <p class="control">
-              <textarea name="message" class="textarea" placeholder="What do you want to say?">{{comment.message | safe}}</textarea>
+              <textarea name="message" class="textarea" placeholder="What do you want to say?">{{comment.render_text() | safe}}</textarea>
             </p>
             <p class="control">
               <a class="button is-link is-pulled-right inline-editable__cancel">Cancel</a>

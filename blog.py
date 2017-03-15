@@ -5,9 +5,7 @@ from google.appengine.ext import ndb
 from template import render_str
 from security import make_secure_val, check_secure_val
 from user import User
-from post import Post
-from comment import Comment
-
+from post import Post, Comment
 
 BLOG_KEY = ndb.Key('Blog', 'default')
 
@@ -185,9 +183,9 @@ class NewComment(BlogHandler):
             p = Post.by_id(BLOG_KEY, post_id)
             comment = Comment(parent=p.key,
                               owner=self.user.key,
-                              message=message)
+                              content=message)
             comment.put()
-            self.redirect('/blog/%s#comments-section' % post_id)
+            self.redirect('/blog/%s' % post_id)
         else:
             self.redirect("/login")
 
@@ -200,12 +198,12 @@ class EditComment(BlogHandler):
         if self.user:
             if comment and comment.is_owned_by(self.user):
                 message = self.request.get('message')
-                comment.message = message
+                comment.content = message
                 comment.put()
             else:
                 self.flash("you can't edit other's comments", "danger")
 
-            self.redirect('/blog/%s#comments-section' % post_id)
+            self.redirect('/blog/%s' % post_id)
         else:
             self.redirect("/login")
 
