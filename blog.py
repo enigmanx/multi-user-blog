@@ -61,6 +61,20 @@ class BlogHandler(webapp2.RequestHandler):
         self.user = uid and User.by_id(int(uid))
 
 
+def protected_resource(func):
+    """Ensure the function is executed only if user is logged in.
+
+    This decorator wraps a function an only executes it
+    if `self.user` is available. Otherwise redirects to `login`
+    """
+    def wrapper(self, *args, **kwargs):
+        if self.user:
+            return func(self, *args, **kwargs)
+        else:
+            self.redirect('/login')
+    return wrapper
+
+
 class MainPage(BlogHandler):
     def get(self):
         self.redirect("/blog")
@@ -84,25 +98,20 @@ class PostPage(BlogHandler):
 
 
 class NewPost(BlogHandler):
+    @protected_resource
     def get(self, post_id=""):
-        if self.user:
-            params = {}
-            # TODO: refactor
-            if post_id:
-                p = Post.by_id(BLOG_KEY, post_id)
-                if p:
-                    params = dict(subject=p.subject,
-                                  content=p.content,
-                                  post_id=post_id)
+        params = {}
+        if post_id:
+            p = Post.by_id(BLOG_KEY, post_id)
+            if p:
+                params = dict(subject=p.subject,
+                              content=p.content,
+                              post_id=post_id)
 
-            self.render("newpost.html", **params)
-        else:
-            self.redirect("/login")
+        self.render("newpost.html", **params)
 
+    @protected_resource
     def post(self, post_id=""):
-        if not self.user:
-            self.redirect('/blog')
-
         owner = self.user
         subject = self.request.get('subject')
         content = self.request.get('content')
@@ -139,91 +148,81 @@ class NewPost(BlogHandler):
 
 
 class DeletePost(BlogHandler):
+    @protected_resource
     def post(self, post_id):
-        if self.user:
-            p = Post.by_id(BLOG_KEY, post_id)
-            own = p and p.is_owned_by(self.user)
-            if own:
-                p.key.delete()
-            else:
-                self.flash(
-                    "you can't delete other's posts",
-                    "danger")
-
-            self.redirect("/blog ")
+        p = Post.by_id(BLOG_KEY, post_id)
+        own = p and p.is_owned_by(self.user)
+        if own:
+            p.key.delete()
         else:
-            self.redirect("/login")
+            self.flash(
+                "you can't delete other's posts",
+                "danger")
+
+        self.redirect("/blog ")
 
 
 class LikePost(BlogHandler):
+    @protected_resource
     def post(self, post_id):
-        if self.user:
-            p = Post.by_id(BLOG_KEY, post_id)
-            own = p and p.is_owned_by(self.user)
-            if own:
-                self.flash("you can't like your own posts", "danger")
-            else:
-                likes = p.likes
-                if p.likes_it(self.user):
-                    likes.remove(self.user.key)
-                else:
-                    likes.append(self.user.key)
-                p.likes = likes
-                p.put()
-
-            self.redirect_to_referer()
+        p = Post.by_id(BLOG_KEY, post_id)
+        own = p and p.is_owned_by(self.user)
+        if own:
+            self.flash("you can't like your own posts", "danger")
         else:
-            self.redirect("/login")
+            likes = p.likes
+            if p.likes_it(self.user):
+                likes.remove(self.user.key)
+            else:
+                likes.append(self.user.key)
+            p.likes = likes
+            p.put()
+
+        self.redirect_to_referer()
 
 
 class NewComment(BlogHandler):
+    @protected_resource
     def post(self, post_id):
-        if self.user:
-            message = self.request.get('message')
-            p = Post.by_id(BLOG_KEY, post_id)
-            comment = Comment(parent=p.key,
-                              owner=self.user.key,
-                              content=message)
-            comment.put()
-            self.redirect('/blog/%s' % post_id)
-        else:
-            self.redirect("/login")
+        message = self.request.get('message')
+        p = Post.by_id(BLOG_KEY, post_id)
+        comment = Comment(parent=p.key,
+                          owner=self.user.key,
+                          content=message)
+        comment.put()
+        self.redirect('/blog/%s' % post_id)
 
 
 # TODO: message can't be empty
 class EditComment(BlogHandler):
+    @protected_resource
     def post(self, post_id, comment_id):
         postKey = ndb.Key(Post, int(post_id), parent=BLOG_KEY)
         comment = Comment.by_id(postKey, comment_id)
-        if self.user:
-            if comment and comment.is_owned_by(self.user):
-                message = self.request.get('message')
-                comment.content = message
-                comment.put()
-            else:
-                self.flash("you can't edit other's comments", "danger")
-
-            self.redirect('/blog/%s' % post_id)
+        if comment and comment.is_owned_by(self.user):
+            message = self.request.get('message')
+            comment.content = message
+            comment.put()
         else:
-            self.redirect("/login")
+            self.flash("you can't edit other's comments", "danger")
+
+        self.redirect('/blog/%s' % post_id)
 
 
 class DeleteComment(BlogHandler):
+    @protected_resource
     def post(self, post_id, comment_id):
-        if self.user:
-            postKey = ndb.Key(Post, int(post_id), parent=BLOG_KEY)
-            c = Comment.by_id(postKey, comment_id)
-            own = c and c.is_owned_by(self.user)
-            if own:
-                c.key.delete()
-            else:
-                self.flash(
-                    "you can't delete other's comments",
-                    "danger")
-
-            self.redirect('/blog/%s#comments-section' % post_id)
+        postKey = ndb.Key(Post, int(post_id), parent=BLOG_KEY)
+        c = Comment.by_id(postKey, comment_id)
+        own = c and c.is_owned_by(self.user)
+        if own:
+            c.key.delete()
         else:
-            self.redirect("/login")
+            self.flash(
+                "you can't delete other's comments",
+                "danger")
+
+        self.redirect('/blog/%s#comments-section' % post_id)
 
 
 class Register(BlogHandler):
