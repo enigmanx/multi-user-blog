@@ -18,6 +18,7 @@ body {
     top: 0;
     width: 100%;
     z-index: 100;
+    max-height: 87px;
 }
 
 #content {
@@ -86,5 +87,22 @@ body {
 
 .inline-editable.is-editing .inline-editable__content {
     display: none;
+}
+
+.flash-message {
+    position: fixed;
+    top: 85px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    border-radius: 0;
+}
+
+.flash-message .delete {
+    top: 0;
+}
+
+.flash-message__wrapper {
+    height: 20px;
 }
 

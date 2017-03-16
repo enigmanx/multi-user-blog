@@ -34,9 +34,13 @@
   <div class="container">
     <div id="content">
     {% for flash in flash_messages %}
-    <div class="notification is-{{flash[1]}} flash-message">
-      <button class="delete"></button>
-      {{flash[0]}}
+    <div class="flash-message__wrapper">
+      <div class="notification is-{{flash[1]}} flash-message">
+        <div class="container">
+          <button class="delete"></button>
+          <p class="has-text-centered">{{flash[0]}}</p>
+        </div>
+      </div>
     </div>
     {% endfor %}
     {% block content %}

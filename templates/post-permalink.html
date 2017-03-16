@@ -26,10 +26,10 @@
           <p class="control">
             <textarea name="message" class="textarea" placeholder="What do you want to say?"></textarea>
           </p>
-          {% if new_comment_error %}
-            <p class="help is-danger">{{new_comment_error}}</p>
-          {% endif %}
           <p class="control">
+            {% if new_comment_error %}
+              <span class="help is-danger is-pulled-left">{{new_comment_error}}</span>
+            {% endif %}
             <button type="submit" class="button is-primary is-pulled-right">Comment</button>
           </p>
         </form>
@@ -70,10 +70,10 @@
             <p class="control">
               <textarea name="message" class="textarea" placeholder="What do you want to say?">{{comment.render_text() | safe}}</textarea>
             </p>
-            {% if error %}
-              <p class="help is-danger">{{error}}</p>
-            {% endif %}
             <p class="control">
+              {% if error %}
+                <span class="help is-danger is-pulled-left">{{error}}</span>
+              {% endif %}
               <a class="button is-link is-pulled-right inline-editable__cancel">Cancel</a>
               <button type="submit" class="button is-primary is-pulled-right">Comment</button>
             </p>
