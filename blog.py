@@ -186,11 +186,17 @@ class NewComment(BlogHandler):
     def post(self, post_id):
         message = self.request.get('message')
         p = Post.by_id(BLOG_KEY, post_id)
-        comment = Comment(parent=p.key,
-                          owner=self.user.key,
-                          content=message)
-        comment.put()
-        self.redirect('/blog/%s' % post_id)
+        if not message:
+            error = 'inform a valid comment, please'
+            self.render("post-permalink.html",
+                        p=p,
+                        new_comment_error=error)
+        else:
+            comment = Comment(parent=p.key,
+                              owner=self.user.key,
+                              content=message)
+            comment.put()
+            self.redirect('/blog/%s' % post_id)
 
 
 # TODO: message can't be empty
@@ -201,8 +207,15 @@ class EditComment(BlogHandler):
         comment = Comment.by_id(postKey, comment_id)
         if comment and comment.is_owned_by(self.user):
             message = self.request.get('message')
-            comment.content = message
-            comment.put()
+            if not message:
+                error = 'inform a valid comment, please'
+                self.render("post-permalink.html",
+                            p=postKey.get(),
+                            comment_error={str(comment_id): error})
+                return
+            else:
+                comment.content = message
+                comment.put()
         else:
             self.flash("you can't edit other's comments", "danger")
 
