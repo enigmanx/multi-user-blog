@@ -13,7 +13,7 @@
         <a href="/blog/{{p.key.id()}}/edit" class="button is-primary is-inverted level-item">
           <span class="icon is-small"><i class="fa fa-edit"></i></span>
         </a>
-        <form method="post" action="/blog/{{p.key.id()}}/like">
+        <form method="post" action="/blog/{{p.key.id()}}/like?origin={{origin}}">
           <button class="level-item button is-primary is-inverted">
             <span class="icon is-small">
               {%if user and p.likes_it(user) %}

@@ -16,7 +16,7 @@
   {% if posts.count() %}
     <div class="box">
       {% for p in posts %}
-        {% with p=p, maxlines=5, user=user %}
+        {% with p=p, maxlines=5, user=user, origin='home' %}
           {% include "post.html" %}
         {% endwith %}
       {% endfor %}

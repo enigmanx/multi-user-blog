@@ -13,7 +13,7 @@
 
 {% block content %}
   <div class="box">
-    {% with p=p, user=user %}
+    {% with p=p, user=user, origin='post' %}
       {% include "post.html" %}
     {% endwith %}
   </div>

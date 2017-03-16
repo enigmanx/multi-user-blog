@@ -52,9 +52,6 @@ class BlogHandler(webapp2.RequestHandler):
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
-    def redirect_to_referer(self):
-        self.redirect(self.request.referer or '/blog')
-
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
@@ -178,7 +175,10 @@ class LikePost(BlogHandler):
             p.likes = likes
             p.put()
 
-        self.redirect_to_referer()
+        origin = self.request.GET['origin']
+        back_to = '/blog' if origin == 'home' else '/blog/%s' % post_id
+
+        self.redirect(back_to)
 
 
 class NewComment(BlogHandler):
@@ -199,7 +199,6 @@ class NewComment(BlogHandler):
             self.redirect('/blog/%s' % post_id)
 
 
-# TODO: message can't be empty
 class EditComment(BlogHandler):
     @protected_resource
     def post(self, post_id, comment_id):
