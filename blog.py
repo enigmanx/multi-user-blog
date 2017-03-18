@@ -29,8 +29,8 @@ class BlogHandler(webapp2.RequestHandler):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
-        params['user'] = self.user
-        params['flash_messages'] = self.session.get_flashes(key="_messages")
+        params["user"] = self.user
+        params["flash_messages"] = self.session.get_flashes(key="_messages")
         return render_str(template, **params)
 
     def render(self, template, **kw):
@@ -39,22 +39,22 @@ class BlogHandler(webapp2.RequestHandler):
     def set_secure_cookie(self, name, val):
         cookie_val = make_secure_val(val)
         self.response.headers.add_header(
-            'Set-Cookie',
-            '%s=%s; Path=/' % (name, cookie_val))
+            "Set-Cookie",
+            "%s=%s; Path=/" % (name, cookie_val))
 
     def read_secure_cookie(self, name):
         cookie_val = self.request.cookies.get(name)
         return cookie_val and check_secure_val(cookie_val)
 
     def login(self, user):
-        self.set_secure_cookie('user_id', str(user.key.id()))
+        self.set_secure_cookie("user_id", str(user.key.id()))
 
     def logout(self):
-        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+        self.response.headers.add_header("Set-Cookie", "user_id=; Path=/")
 
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
-        uid = self.read_secure_cookie('user_id')
+        uid = self.read_secure_cookie("user_id")
         self.user = uid and User.by_id(int(uid))
 
 
@@ -68,7 +68,7 @@ def protected_resource(func):
         if self.user:
             return func(self, *args, **kwargs)
         else:
-            self.redirect('/login')
+            self.redirect("/login")
     return wrapper
 
 
@@ -80,7 +80,7 @@ class MainPage(BlogHandler):
 class BlogFront(BlogHandler):
     def get(self):
         posts = Post.query(ancestor=BLOG_KEY).order(-Post.created)
-        self.render('front.html', posts=posts)
+        self.render("front.html", posts=posts)
 
 
 class PostPage(BlogHandler):
@@ -110,9 +110,9 @@ class NewPost(BlogHandler):
     @protected_resource
     def post(self, post_id=""):
         owner = self.user
-        subject = self.request.get('subject')
-        content = self.request.get('content')
-        redirect_to = self.request.get('redirect_to')
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        redirect_to = self.request.get("redirect_to")
 
         if subject and content:
             if post_id:
@@ -133,7 +133,7 @@ class NewPost(BlogHandler):
                          likes=[],
                          content=content)
             p.put()
-            self.redirect('/blog/%s' % p.key.id())
+            self.redirect("/blog/%s" % p.key.id())
 
         else:
             error = "subject and content, please!"
@@ -175,8 +175,8 @@ class LikePost(BlogHandler):
             p.likes = likes
             p.put()
 
-        origin = self.request.GET['origin']
-        back_to = '/blog' if origin == 'home' else '/blog/%s' % post_id
+        origin = self.request.GET["origin"]
+        back_to = "/blog" if origin == "home" else "/blog/%s" % post_id
 
         self.redirect(back_to)
 
@@ -184,10 +184,10 @@ class LikePost(BlogHandler):
 class NewComment(BlogHandler):
     @protected_resource
     def post(self, post_id):
-        message = self.request.get('message')
+        message = self.request.get("message")
         p = Post.by_id(BLOG_KEY, post_id)
         if not message:
-            error = 'inform a valid comment, please'
+            error = "inform a valid comment, please"
             self.render("post-permalink.html",
                         p=p,
                         new_comment_error=error)
@@ -205,9 +205,9 @@ class EditComment(BlogHandler):
         postKey = ndb.Key(Post, int(post_id), parent=BLOG_KEY)
         comment = Comment.by_id(postKey, comment_id)
         if comment and comment.is_owned_by(self.user):
-            message = self.request.get('message')
+            message = self.request.get("message")
             if not message:
-                error = 'inform a valid comment, please'
+                error = "inform a valid comment, please"
                 self.render("post-permalink.html",
                             p=postKey.get(),
                             comment_error={str(comment_id): error})
@@ -218,7 +218,7 @@ class EditComment(BlogHandler):
         else:
             self.flash("you can't edit other's comments", "danger")
 
-        self.redirect('/blog/%s' % post_id)
+        self.redirect("/blog/%s" % post_id)
 
 
 class DeleteComment(BlogHandler):
@@ -242,65 +242,65 @@ class Register(BlogHandler):
         self.render("signup-form.html", errors={})
 
     def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
-        verify = self.request.get('verify')
-        email = self.request.get('email')
+        username = self.request.get("username")
+        password = self.request.get("password")
+        verify = self.request.get("verify")
+        email = self.request.get("email")
 
         errors = User.validate_new(username, password, verify, email)
         if len(errors) > 0:
             params = dict(username=username,
                           email=email,
                           errors=errors)
-            self.render('signup-form.html', **params)
+            self.render("signup-form.html", **params)
         else:
             u = User.register(username, password, email)
             u.put()
             self.login(u)
-            self.redirect('/blog')
+            self.redirect("/blog")
 
 
 class Login(BlogHandler):
     def get(self):
-        self.render('login-form.html')
+        self.render("login-form.html")
 
     def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
+        username = self.request.get("username")
+        password = self.request.get("password")
 
         u = User.login(username, password)
         if u:
             self.login(u)
-            self.redirect('/blog')
+            self.redirect("/blog")
         else:
-            msg = 'Invalid login'
-            self.render('login-form.html', error=msg)
+            msg = "Invalid login"
+            self.render("login-form.html", error=msg)
 
 
 class Logout(BlogHandler):
     def get(self):
         self.logout()
-        self.redirect('/blog')
+        self.redirect("/blog")
 
 app_config = {}
-app_config['webapp2_extras.sessions'] = {
-    'secret_key': 'not soo secret',
+app_config["webapp2_extras.sessions"] = {
+    "secret_key": "not soo secret",
 }
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/blog/?', BlogFront),
-    ('/blog/([0-9]+)', PostPage),
-    ('/blog/([0-9]+)/delete', DeletePost),
-    ('/blog/newpost', NewPost),
-    ('/blog/([0-9]+)/edit', NewPost),
-    ('/blog/([0-9]+)/like', LikePost),
-    ('/blog/([0-9]+)/comments/new', NewComment),
-    ('/blog/([0-9]+)/comments/([0-9]+)/edit', EditComment),
-    ('/blog/([0-9]+)/comments/([0-9]+)/delete', DeleteComment),
-    ('/signup', Register),
-    ('/login', Login),
-    ('/logout', Logout)
+    ("/", MainPage),
+    ("/blog/?", BlogFront),
+    ("/blog/([0-9]+)", PostPage),
+    ("/blog/([0-9]+)/delete", DeletePost),
+    ("/blog/newpost", NewPost),
+    ("/blog/([0-9]+)/edit", NewPost),
+    ("/blog/([0-9]+)/like", LikePost),
+    ("/blog/([0-9]+)/comments/new", NewComment),
+    ("/blog/([0-9]+)/comments/([0-9]+)/edit", EditComment),
+    ("/blog/([0-9]+)/comments/([0-9]+)/delete", DeleteComment),
+    ("/signup", Register),
+    ("/login", Login),
+    ("/logout", Logout)
     ],
     config=app_config,
     debug=True)

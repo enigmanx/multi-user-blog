@@ -37,40 +37,40 @@ class User(ndb.Model):
     def validate_new(cls, name, pwd, verify_pwd, email=None):
         errors = {}
         if User.by_name(name):
-            errors['username'] = "That user already exists."
+            errors["username"] = "That user already exists."
         else:
             if not valid_username(name):
-                errors['username'] = "That's not a valid username."
+                errors["username"] = "That's not a valid username."
 
             if not valid_password(pwd):
-                errors['password'] = "That wasn't a valid password."
+                errors["password"] = "That wasn't a valid password."
             elif pwd != verify_pwd:
-                errors['verify'] = "Your passwords didn't match."
+                errors["verify"] = "Your passwords didn't match."
 
             if not valid_email(email):
-                errors['email'] = "That's not a valid email."
+                errors["email"] = "That's not a valid email."
 
         return errors
 
 
 def make_salt(length=5):
-    return ''.join(random.choice(letters) for x in xrange(length))
+    return "".join(random.choice(letters) for x in xrange(length))
 
 
 def make_pw_hash(name, pw, salt=None):
     if not salt:
         salt = make_salt()
     h = hashlib.sha256(name + pw + salt).hexdigest()
-    return '%s,%s' % (salt, h)
+    return "%s,%s" % (salt, h)
 
 
 def valid_pw(name, password, h):
-    salt = h.split(',')[0]
+    salt = h.split(",")[0]
     return h == make_pw_hash(name, password, salt)
 
 
-def users_key(group='default'):
-    return ndb.Key.from_path('users', group)
+def users_key(group="default"):
+    return ndb.Key.from_path("users", group)
 
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")

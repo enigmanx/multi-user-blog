@@ -19,7 +19,7 @@ class Postable(ndb.Model):
 
     def render_text(self, abridged=False):
         content_lines = self.content.split('\n')
-        more = ''
+        more = ""
         if abridged:
             more_link = '... <a href="/blog/%s">(more)</a>' % self.key.id()
             max_lines = 5
@@ -29,11 +29,10 @@ class Postable(ndb.Model):
                 content_lines = content_lines[:max_lines]
                 more = more_link
             elif content_length > max_length:
-                print "here"
                 content_lines = self.content[:max_length].split('\n')
                 more = more_link
 
-        return '<br>'.join(content_lines) + more
+        return "<br>".join(content_lines) + more
 
 
 class Post(Postable):
