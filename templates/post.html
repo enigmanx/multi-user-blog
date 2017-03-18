@@ -5,7 +5,7 @@
       <p>
         <small>{{p.owner.get().name}} on {{p.created.strftime("%b %d, %Y")}}</small>
         <br />
-        {{p.render_text(maxlines) | safe}}
+        {{p.render_text(abridged) | safe}}
       </p>
     </div>
     <nav class="level">

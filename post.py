@@ -17,13 +17,23 @@ class Postable(ndb.Model):
     def is_owned_by(self, user):
         return self.owner.id() == user.key.id()
 
-    def render_text(self, max_lines=None):
-        content_list = self.content.split('\n')
+    def render_text(self, abridged=False):
+        content_lines = self.content.split('\n')
         more = ''
-        if max_lines and len(content_list) > max_lines:
-            more = '... <a href="/blog/%s">(more)</a>' % self.key.id()
-            content_list = content_list[:max_lines]
-        return '<br>'.join(content_list) + more
+        if abridged:
+            more_link = '... <a href="/blog/%s">(more)</a>' % self.key.id()
+            max_lines = 5
+            max_length = 530
+            content_length = len(self.content)
+            if len(content_lines) > max_lines:
+                content_lines = content_lines[:max_lines]
+                more = more_link
+            elif content_length > max_length:
+                print "here"
+                content_lines = self.content[:max_length].split('\n')
+                more = more_link
+
+        return '<br>'.join(content_lines) + more
 
 
 class Post(Postable):
