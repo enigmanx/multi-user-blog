@@ -7,6 +7,14 @@ from google.appengine.ext import ndb
 
 
 class User(ndb.Model):
+    """An User on the Multi User Blog.
+
+    Args:
+        name (str): The user name.
+        pw_hash (str): The password hash.
+        email (str): The user email. This is an optional property.
+
+    """
     name = ndb.StringProperty(required=True)
     pw_hash = ndb.StringProperty(required=True)
     email = ndb.StringProperty()
@@ -35,6 +43,22 @@ class User(ndb.Model):
 
     @classmethod
     def validate_new(cls, name, pwd, verify_pwd, email=None):
+        """Validates a new user.
+
+        A valid user needs to have a valid name, a valid password and
+        password verification. It can also have an email, in this case the
+        email needs to be a valid one.
+
+        Args:
+            name (str): The user name.
+            pwd (str): The password.
+            verify_pwd (str): The password verification.
+            email (str): The user email. Defaults to None.
+
+        Returns:
+            If there's an error, it is return as a dictionary with the property name
+            and the error message. If there's no error an empty dictionary is returned.
+        """
         errors = {}
         if User.by_name(name):
             errors["username"] = "That user already exists."

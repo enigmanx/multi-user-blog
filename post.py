@@ -3,7 +3,16 @@ from template import render_str
 from user import User
 
 
-class Postable(ndb.Model):
+class PostLike(ndb.Model):
+    """Represents a content posted by an user.
+
+    Args:
+        owner (ndb.Key): The user who posted this content
+        content (str): The content of this post
+        created (date): The creation date
+        last_modified (date): The last time this post was modified
+    """
+
     owner = ndb.KeyProperty(User)
     content = ndb.TextProperty(required=True)
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -18,6 +27,16 @@ class Postable(ndb.Model):
         return self.owner.id() == user.key.id()
 
     def render_text(self, abridged=False):
+        """Renders the post content.
+
+        Renders the post content replacing line breaks with `<br>`.
+        This function also accepts an ``abridged`` parameter that when `True`
+        will render an abridged verion of this post content, that is,
+        only 5 lines or 530 characters.
+
+        Args:
+            abridged (bool): Whenever to render the abridged version or not
+        """
         content_lines = self.content.split('\n')
         more = ""
         if abridged:
@@ -35,7 +54,7 @@ class Postable(ndb.Model):
         return "<br>".join(content_lines) + more
 
 
-class Post(Postable):
+class Post(PostLike):
     subject = ndb.StringProperty(required=True)
     likes = ndb.KeyProperty(User, repeated=True)
 
@@ -46,5 +65,5 @@ class Post(Postable):
         return Comment.query(ancestor=self.key).order(-Comment.created).fetch()
 
 
-class Comment(Postable):
+class Comment(PostLike):
     pass

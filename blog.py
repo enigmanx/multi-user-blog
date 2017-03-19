@@ -8,6 +8,26 @@ from user import User
 from post import Post, Comment
 
 BLOG_KEY = ndb.Key('Blog', 'default')
+"""ndb.Key blog parent key
+
+Key use as parent when saving and retriving posts. Google Datastore
+dictates that a parent key is nedeed if one wants to avoid eventual
+consistency (records being eventually available).
+"""
+
+
+def protected_resource(func):
+    """Ensure the function is executed only if user is logged in.
+
+    This decorator wraps a function an only executes it
+    if `self.user` is available. Otherwise redirects to `login`
+    """
+    def wrapper(self, *args, **kwargs):
+        if self.user:
+            return func(self, *args, **kwargs)
+        else:
+            self.redirect("/login")
+    return wrapper
 
 
 class BlogHandler(webapp2.RequestHandler):
@@ -56,20 +76,6 @@ class BlogHandler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie("user_id")
         self.user = uid and User.by_id(int(uid))
-
-
-def protected_resource(func):
-    """Ensure the function is executed only if user is logged in.
-
-    This decorator wraps a function an only executes it
-    if `self.user` is available. Otherwise redirects to `login`
-    """
-    def wrapper(self, *args, **kwargs):
-        if self.user:
-            return func(self, *args, **kwargs)
-        else:
-            self.redirect("/login")
-    return wrapper
 
 
 class MainPage(BlogHandler):
